@@ -33,9 +33,44 @@ scene.add(light);
 const ambient = new THREE.AmbientLight(0xffffff, 0.3);
 scene.add(ambient);
 
-// 6) Render loop
+// Floor
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(50, 50),
+  new THREE.MeshStandardMaterial({ color: 0x334455 })
+);
+floor.rotation.x = -Math.PI/2;
+scene.add(floor);
+
+// Movement
+
+const keys = {};
+
+window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+const SPEED = 0.05;
+
+const forward = new THREE.Vector3();
+const right = new THREE.Vector3();
+const UP = new THREE.Vector3(0, 1, 0);
+
+function moveCamera() {
+  camera.getWorldDirection(forward); // direction we're facing
+  forward.y = 0; // no flying yet
+  forward.normalize(); // diagonal isn't faster
+  
+  right.crossVectors(forward, UP).normalize();
+
+  if (keys['KeyW']) camera.position.addScaledVector(forward,  SPEED);
+  if (keys['KeyA']) camera.position.addScaledVector(right,   -SPEED);
+  if (keys['KeyS']) camera.position.addScaledVector(forward, -SPEED);
+  if (keys['KeyD']) camera.position.addScaledVector(right,    SPEED);
+}
+
+// ---- Render loop ----
 function animate() {
   requestAnimationFrame(animate);
+  moveCamera();
   cube.rotation.y += 0.01;
   renderer.render(scene, camera);
 }
