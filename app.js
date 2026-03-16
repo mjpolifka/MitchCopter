@@ -49,6 +49,7 @@ window.addEventListener('keydown', (e) => { keys[e.code] = true; });
 window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
 const SPEED = 0.05;
+const TURN_SPEED = 0.02;
 
 const forward = new THREE.Vector3();
 const right = new THREE.Vector3();
@@ -56,15 +57,23 @@ const UP = new THREE.Vector3(0, 1, 0);
 
 function moveCamera() {
   camera.getWorldDirection(forward); // direction we're facing
-  forward.y = 0; // no flying yet
   forward.normalize(); // diagonal isn't faster
   
   right.crossVectors(forward, UP).normalize();
 
-  if (keys['KeyW']) camera.position.addScaledVector(forward,  SPEED);
-  if (keys['KeyA']) camera.position.addScaledVector(right,   -SPEED);
-  if (keys['KeyS']) camera.position.addScaledVector(forward, -SPEED);
-  if (keys['KeyD']) camera.position.addScaledVector(right,    SPEED);
+  if (keys['ArrowUp'])   camera.position.addScaledVector(forward,  SPEED);
+  if (keys['ArrowDown']) camera.position.addScaledVector(forward, -SPEED);
+
+  if (keys['ArrowLeft']) camera.rotation.y += TURN_SPEED;
+  if (keys['ArrowRight']) camera.rotation.y -= TURN_SPEED;
+
+  if (keys['KeyA']) camera.position.addScaledVector(right, -SPEED);
+  if (keys['KeyS']) camera.position.addScaledVector(right,  SPEED);
+
+  if (keys['KeyQ']) camera.position.addScaledVector(UP,  SPEED);
+  if (keys['KeyW']) camera.position.addScaledVector(UP,  -SPEED);
+
+  camera.position.y = Math.max(1.6, camera.position.y); // floor clamp
 }
 
 // ---- Render loop ----
