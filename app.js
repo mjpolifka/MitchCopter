@@ -62,7 +62,7 @@ collidables.push(floor);
 // Models
 
 loadModel(
-  'assets/kenney_city_kit_commercial_2.1/Models/GLB format/building-skyscraper-a.glb',
+  'assets/buildings/building-skyscraper-a.glb',
   [-2.5, 0, 0], //position
   [2, 2, 2], //scale
   [0, 0, 0], //rotation
@@ -75,7 +75,7 @@ loadModel(
 )
 
 loadModel(
-  'assets/kenney_city_kit_commercial_2.1/Models/GLB format/building-skyscraper-b.glb',
+  'assets/buildings/building-skyscraper-b.glb',
   [2.5, 0, 0], //position
   [2, 2, 2], //scale
   [0, 0, 0], //rotation
