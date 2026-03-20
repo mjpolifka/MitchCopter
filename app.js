@@ -1,5 +1,5 @@
-import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const collidables = []
 const loader = new GLTFLoader();
@@ -58,23 +58,14 @@ floor.rotation.x = -Math.PI/2;
 scene.add(floor);
 collidables.push(floor);
 
-// Floor is invisible from below, though normally that's fine
-// const ceiling = new THREE.Mesh(
-//   new THREE.PlaneGeometry(50, 50),
-//   new THREE.MeshStandardMaterial({ color: 0x334455 })
-// );
-// ceiling.rotation.x = Math.PI/2;
-// scene.add(ceiling);
-// collidables.push(ceiling);
-
 
 // Models
 
 loadModel(
   'assets/kenney_city_kit_commercial_2.1/Models/GLB format/building-skyscraper-a.glb',
-  [-2, 0, 0], //position
-  [2, 2, 2], //rotation
-  [0, 0, 0], //scale
+  [-2.5, 0, 0], //position
+  [2, 2, 2], //scale
+  [0, 0, 0], //rotation
   (modelScene) => {
     // Moved into loadModel, though might want its own function
     // modelScene.position.set(5, 0, -10);
@@ -85,9 +76,9 @@ loadModel(
 
 loadModel(
   'assets/kenney_city_kit_commercial_2.1/Models/GLB format/building-skyscraper-b.glb',
-  [3, 0, 0], //position
-  [2, 2, 2], //rotation
-  [0, 0, 0], //scale
+  [2.5, 0, 0], //position
+  [2, 2, 2], //scale
+  [0, 0, 0], //rotation
   (modelScene) => {
     // Moved into loadModel, though might want its own function
     // modelScene.position.set(5, 0, -10);
@@ -96,8 +87,46 @@ loadModel(
   }
 )
 
+loadModel(
+  'assets/roads/road-straight.glb',
+  [-2, 0, 2.5], //position
+  [2, 2, 2], //scale
+  [0, 0, 0], //rotation
+  (modelScene) => {
+    // Moved into loadModel, though might want its own function
+    // modelScene.position.set(5, 0, -10);
+    // modelScene.rotation.set(0, Math.PI/4, 0);
+    // modelScene.scale.set(2, 2, 2);
+  }
+)
 
-// const loader = new GLTFLoader();
+loadModel(
+  'assets/roads/road-straight.glb',
+  [0, 0, 2.5], //position
+  [2, 2, 2], //scale
+  [0, 0, 0], //rotation
+  (modelScene) => {
+    // Moved into loadModel, though might want its own function
+    // modelScene.position.set(5, 0, -10);
+    // modelScene.rotation.set(0, Math.PI/4, 0);
+    // modelScene.scale.set(2, 2, 2);
+  }
+)
+
+loadModel(
+  'assets/roads/road-straight.glb',
+  [2, 0, 2.5], //position
+  [2, 2, 2], //scale
+  [0, 0, 0], //rotation
+  (modelScene) => {
+    // Moved into loadModel, though might want its own function
+    // modelScene.position.set(5, 0, -10);
+    // modelScene.rotation.set(0, Math.PI/4, 0);
+    // modelScene.scale.set(2, 2, 2);
+  }
+)
+
+// const loader = new GLTFLoader(); // moved to top
 
 function loadModel(
                     path, 
@@ -137,7 +166,7 @@ function loadModel(
 
 // ----------- Collision -----------
 
-// const collidables = []
+// const collidables = [] // moved to top
 
 const HELICOPTER_RADIUS = 1.6;
 const raycaster = new THREE.Raycaster();
