@@ -1,31 +1,24 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
-// 1) Scene
+// Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x202533);
 
-// 2) Camera
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-camera.position.set(0, 1.6, 5); // eye-height-ish
-
-// 3) Renderer
+// Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// 4) Something visible (cube)
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 10, 1),
-  new THREE.MeshStandardMaterial({ color: 0x44aa88 })
-);
-scene.add(cube);
+// Handle window resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
-// 5) Light
+
+
+// Light
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(3, 5, 2);
 scene.add(light);
@@ -33,12 +26,50 @@ scene.add(light);
 const ambient = new THREE.AmbientLight(0xffffff, 0.3);
 scene.add(ambient);
 
-// 6) Handle window resize
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+// Helicopter
+const helicopterObject = new THREE.Object3D();
+helicopterObject.position.set(0, 1.6, 5);
+scene.add(helicopterObject);
+
+// Camera
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+helicopterObject.add(camera);
+camera.rotation.y = Math.PI; // rotate camera to match the object's front
+helicopterObject.rotation.y = Math.PI; // rotate the helicopter to face the building
+
+
+// Collision
+
+const collidables = []
+
+// const HELICOPTER_RADIUS = 1.0;
+// const raycaster = new THREE.Raycaster();
+
+// const downCollider = new THREE.Vector3(0, -1, 0);
+// const forwardCollider = new THREE.Vector3();
+// const rightCollider = new THREE.Vector3();
+
+// function checkCollisions() {
+//   const position = yawObject.position; // this is from when we did mouse movement, it doesn't exist
+//   // But do we need to make something to represent the helicopter instead of using the camera?
+//   // No doubt, so we can have multiple cameras
+// }
+
+
+
+// Building
+const building = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 5, 1),
+  new THREE.MeshStandardMaterial({ color: 0x44aa88 })
+);
+building.position.y = 2.5;
+scene.add(building);
+collidables.push(building);
 
 // Floor
 const floor = new THREE.Mesh(
@@ -47,6 +78,11 @@ const floor = new THREE.Mesh(
 );
 floor.rotation.x = -Math.PI/2;
 scene.add(floor);
+collidables.push(floor);
+
+
+
+
 
 
 
@@ -68,25 +104,25 @@ const UP = new THREE.Vector3(0, 1, 0);
 
 
 
-function moveCamera(deltaTime) {
-  camera.getWorldDirection(forward); // direction we're facing
+function moveHelicopter(deltaTime) {
+  helicopterObject.getWorldDirection(forward); // direction we're facing
   forward.normalize(); // diagonal isn't faster
   
   right.crossVectors(forward, UP).normalize();
 
-  if (keys['ArrowUp'])   camera.position.addScaledVector(forward,  SPEED * deltaTime);
-  if (keys['ArrowDown']) camera.position.addScaledVector(forward, -SPEED * deltaTime);
+  if (keys['ArrowUp'])   helicopterObject.position.addScaledVector(forward,  SPEED * deltaTime);
+  if (keys['ArrowDown']) helicopterObject.position.addScaledVector(forward, -SPEED * deltaTime);
 
-  if (keys['ArrowLeft']) camera.rotation.y += TURN_SPEED * deltaTime;
-  if (keys['ArrowRight']) camera.rotation.y -= TURN_SPEED * deltaTime;
+  if (keys['ArrowLeft']) helicopterObject.rotation.y += TURN_SPEED * deltaTime;
+  if (keys['ArrowRight']) helicopterObject.rotation.y -= TURN_SPEED * deltaTime;
 
-  if (keys['KeyA']) camera.position.addScaledVector(right, -SPEED * deltaTime);
-  if (keys['KeyS']) camera.position.addScaledVector(right,  SPEED * deltaTime);
+  if (keys['KeyA']) helicopterObject.position.addScaledVector(right, -SPEED * deltaTime);
+  if (keys['KeyS']) helicopterObject.position.addScaledVector(right,  SPEED * deltaTime);
 
-  if (keys['KeyQ']) camera.position.addScaledVector(UP,  SPEED * deltaTime);
-  if (keys['KeyW']) camera.position.addScaledVector(UP,  -SPEED * deltaTime);
+  if (keys['KeyQ']) helicopterObject.position.addScaledVector(UP,  SPEED * deltaTime);
+  if (keys['KeyW']) helicopterObject.position.addScaledVector(UP,  -SPEED * deltaTime);
 
-  camera.position.y = Math.max(1.6, camera.position.y); // floor clamp
+  helicopterObject.position.y = Math.max(1.6, helicopterObject.position.y); // floor clamp
 }
 
 
@@ -100,7 +136,7 @@ function animate(timestamp) {
   const delta = Math.min((timestamp - lastTime) / 1000, 0.1);
   lastTime = timestamp;
 
-  moveCamera(delta);
+  moveHelicopter(delta);
   renderer.render(scene, camera);
 }
 
