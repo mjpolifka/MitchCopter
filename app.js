@@ -57,12 +57,47 @@ const rightCollider = new THREE.Vector3();
 function checkCollisions() {
   const position = helicopterObject.position;
 
-  // Ground check
+  // Ground/overhead check
   raycaster.set(position, downCollider);
   const downHits = raycaster.intersectObjects(collidables);
+  resolveCollision(downHits, downCollider);
 
-  if (downHits.length > 0 && downHits[0].distance < HELICOPTER_RADIUS) {
-    helicopterObject.position.y += HELICOPTER_RADIUS - downHits[0].distance;
+  const upCollider = downCollider.clone().negate();
+  raycaster.set(position, upCollider);
+  const upHits = raycaster.intersectObjects(collidables);
+  resolveCollision(upHits, upCollider);
+
+
+  // Forward/back check
+  helicopterObject.getWorldDirection(forwardCollider);
+  forwardCollider.normalize();
+
+  raycaster.set(position, forwardCollider);
+  const forwardHits = raycaster.intersectObjects(collidables);
+  resolveCollision(forwardHits, forwardCollider);
+
+  const backCollider = forwardCollider.clone().negate();
+  raycaster.set(position, backCollider);
+  const backHits = raycaster.intersectObjects(collidables);
+  resolveCollision(backHits, backCollider);
+
+
+  // Left/right check
+  rightCollider.crossVectors(forwardCollider, downCollider.negate()).normalize();
+
+  raycaster.set(position, rightCollider);
+  const rightHits = raycaster.intersectObjects(collidables);
+  resolveCollision(rightHits, rightCollider);
+
+  const leftCollider = rightCollider.clone().negate();
+  raycaster.set(position, leftCollider);
+  const leftHits = raycaster.intersectObjects(collidables);
+  resolveCollision(leftHits, leftCollider);
+}
+
+function resolveCollision(hits, directionVector) {
+  if (hits.length > 0 && hits[0].distance < HELICOPTER_RADIUS) {
+    helicopterObject.position.addScaledVector(directionVector, -(HELICOPTER_RADIUS - hits[0].distance));
   }
 }
 
@@ -113,7 +148,7 @@ const UP = new THREE.Vector3(0, 1, 0);
 
 function moveHelicopter(deltaTime) {
   helicopterObject.getWorldDirection(forward); // direction we're facing
-  forward.normalize(); // diagonal isn't faster
+  forward.normalize(); // diagonal isn't faster // I could understand this more deeply for sure
   
   right.crossVectors(forward, UP).normalize();
 
@@ -128,8 +163,6 @@ function moveHelicopter(deltaTime) {
 
   if (keys['KeyQ']) helicopterObject.position.addScaledVector(UP,  SPEED * deltaTime);
   if (keys['KeyW']) helicopterObject.position.addScaledVector(UP,  -SPEED * deltaTime);
-
-  // helicopterObject.position.y = Math.max(1.6, helicopterObject.position.y); // floor clamp
 }
 
 
