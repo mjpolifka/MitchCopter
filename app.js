@@ -52,7 +52,7 @@ helicopterObject.rotation.y = Math.PI; // rotate the helicopter to face the buil
 const textureLoader = new THREE.TextureLoader();
 
 // Floor
-const floorTexture = textureLoader.load('/assets/textures/grass.webp');
+const floorTexture = textureLoader.load('assets/textures/grass.webp');
 floorTexture.wrapS = THREE.RepeatWrapping;
 floorTexture.wrapT = THREE.RepeatWrapping;
 floorTexture.repeat.set(20, 20);
@@ -66,7 +66,7 @@ scene.add(floor);
 collidables.push(floor);
 
 // Ceiling
-const ceilingTexture = textureLoader.load('/assets/textures/concrete.webp');
+const ceilingTexture = textureLoader.load('assets/textures/concrete.webp');
 ceilingTexture.wrapS = THREE.RepeatWrapping;
 ceilingTexture.wrapT = THREE.RepeatWrapping;
 ceilingTexture.repeat.set(20, 20);
@@ -80,7 +80,7 @@ scene.add(ceiling);
 collidables.push(ceiling);
 
 // Building - comment out below Models
-// const wallTex = textureLoader.load('/assets/textures/concrete.webp');
+// const wallTex = textureLoader.load('assets/textures/concrete.webp');
 // wallTex.wrapS = THREE.RepeatWrapping;
 // wallTex.wrapT = THREE.RepeatWrapping;
 // wallTex.repeat.set(2, 3); // 2 tiles wide, 3 tiles tall
