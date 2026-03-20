@@ -67,9 +67,14 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 
 ### Other Things We'll Need
 
-- Load city from sc2 file
-  - handle terrain height
-  - create buildings which match expected sizes
+- Load city from file
+  - 2x2 array for coords
+  - data includes: elevation, asset id, rotation
+    - not sure how to handle "multiple squares equal one building"
+  - using this, we can build a prototype that uses the kenney 1x1 assets (scaled 2x)
+  - then create my own assets
+  - then enable loading from a .sc2 file
+- Controls toggle (classic <-> modern)
 - Helicopter visual model
 - Physics model (speed, acceleration, inertia)
 - Multiple cameras (down view, 3rd-person view)

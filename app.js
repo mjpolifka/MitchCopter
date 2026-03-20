@@ -205,7 +205,7 @@ function checkCollisions() {
 
 
   // Left/right check
-  rightCollider.crossVectors(forwardCollider, downCollider.negate()).normalize();
+  rightCollider.crossVectors(forwardCollider, upCollider).normalize();
 
   raycaster.set(position, rightCollider);
   const rightHits = raycaster.intersectObjects(collidables);
