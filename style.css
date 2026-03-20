@@ -1,0 +1,38 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+canvas {
+  display: block;
+}
+
+#controls-panel {
+  position: fixed;       /* stays in place regardless of anything */
+  top: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-family: monospace;
+  font-size: 13px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  pointer-events: none;  /* clicks pass through to the canvas */
+  user-select: none;
+  z-index: 10;           /* sits above the canvas */
+  border-right: 1px solid rgba(255,255,255,0.3);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+#controls-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  padding-bottom: 6px;
+}
+
+#controls-panel p {
+  margin: 4px 0;
+}
