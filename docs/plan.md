@@ -60,7 +60,6 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 
 ## My Learning Order
 
-4. **Basic collision** — Raycaster? Suddenly the world feels solid
 5. **Imported geometry** — load a real city to fly through
 6. **Textures** — big visual payoff for low complexity
 7. **Shadows** — makes everything look dramatically more real
@@ -69,15 +68,21 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 
 ### Other Things We'll Need
 
-- Helicopter model
+- Helicopter visual model
 - Physics model (speed, acceleration, inertia)
 - Multiple cameras (down view, 3rd-person view)
 - HUD/UI
 - Mission loops
 - Store/Upgrades
 
+### Things That Came Up That We Might Not Need
+
+- Swept collision (clipping an edge b/c you're going too fast)
+- Collision performance, use simplified "collision mesh" instead of actual geometry
+
 ### Things We've Done
 
 1. **Basic Boilerplate** - Scene, Camera, Renderer, cube for visuals, Lights, render loop
 2. **Keyboard movement** - moveCamera function that detects if a key is held down each frame
 3. **Delta time** — fix this now before bad habits set in, it's a small change
+4. **Basic collision** — Suddenly the world feels solid
