@@ -71,6 +71,7 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 
 - Helicopter model
 - Physics model (speed, acceleration, inertia)
+- Multiple cameras (down view, 3rd-person view)
 - HUD/UI
 - Mission loops
 - Store/Upgrades

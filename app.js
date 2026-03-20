@@ -47,18 +47,24 @@ helicopterObject.rotation.y = Math.PI; // rotate the helicopter to face the buil
 
 const collidables = []
 
-// const HELICOPTER_RADIUS = 1.0;
-// const raycaster = new THREE.Raycaster();
+const HELICOPTER_RADIUS = 1.6;
+const raycaster = new THREE.Raycaster();
 
-// const downCollider = new THREE.Vector3(0, -1, 0);
-// const forwardCollider = new THREE.Vector3();
-// const rightCollider = new THREE.Vector3();
+const downCollider = new THREE.Vector3(0, -1, 0);
+const forwardCollider = new THREE.Vector3();
+const rightCollider = new THREE.Vector3();
 
-// function checkCollisions() {
-//   const position = yawObject.position; // this is from when we did mouse movement, it doesn't exist
-//   // But do we need to make something to represent the helicopter instead of using the camera?
-//   // No doubt, so we can have multiple cameras
-// }
+function checkCollisions() {
+  const position = helicopterObject.position;
+
+  // Ground check
+  raycaster.set(position, downCollider);
+  const downHits = raycaster.intersectObjects(collidables);
+
+  if (downHits.length > 0 && downHits[0].distance < HELICOPTER_RADIUS) {
+    helicopterObject.position.y += HELICOPTER_RADIUS - downHits[0].distance;
+  }
+}
 
 
 
@@ -70,6 +76,7 @@ const building = new THREE.Mesh(
 building.position.y = 2.5;
 scene.add(building);
 collidables.push(building);
+
 
 // Floor
 const floor = new THREE.Mesh(
@@ -122,7 +129,7 @@ function moveHelicopter(deltaTime) {
   if (keys['KeyQ']) helicopterObject.position.addScaledVector(UP,  SPEED * deltaTime);
   if (keys['KeyW']) helicopterObject.position.addScaledVector(UP,  -SPEED * deltaTime);
 
-  helicopterObject.position.y = Math.max(1.6, helicopterObject.position.y); // floor clamp
+  // helicopterObject.position.y = Math.max(1.6, helicopterObject.position.y); // floor clamp
 }
 
 
@@ -137,6 +144,8 @@ function animate(timestamp) {
   lastTime = timestamp;
 
   moveHelicopter(delta);
+  checkCollisions();
+
   renderer.render(scene, camera);
 }
 
