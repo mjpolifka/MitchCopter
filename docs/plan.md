@@ -60,7 +60,6 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 
 ## My Learning Order
 
-5. **Imported geometry** — load a real city to fly through
 6. **Textures** — big visual payoff for low complexity
 7. **Shadows** — makes everything look dramatically more real
 8. **Shooting** — the fun begins - maybe more like "water bucket"
@@ -68,12 +67,19 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 
 ### Other Things We'll Need
 
+- Load city from sc2 file
+  - handle terrain height
+  - create buildings which match expected sizes
 - Helicopter visual model
 - Physics model (speed, acceleration, inertia)
 - Multiple cameras (down view, 3rd-person view)
 - HUD/UI
 - Mission loops
+  - Traffic Jam (use megaphone)
+  - Fire (use bucket)
+- Exiting the helicopter, walking on foot
 - Store/Upgrades
+- Sounds and music
 
 ### Things That Came Up That We Might Not Need
 
@@ -86,3 +92,4 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 2. **Keyboard movement** - moveCamera function that detects if a key is held down each frame
 3. **Delta time** — fix this now before bad habits set in, it's a small change
 4. **Basic collision** — Suddenly the world feels solid
+5. **Imported geometry** — load a real city to fly through (models from kenney.nl)
