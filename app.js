@@ -1,4 +1,8 @@
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+
+const collidables = []
+const loader = new GLTFLoader();
 
 // Scene
 const scene = new THREE.Scene();
@@ -15,8 +19,6 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-
 
 // Light
 const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -43,9 +45,99 @@ camera.rotation.y = Math.PI; // rotate camera to match the object's front
 helicopterObject.rotation.y = Math.PI; // rotate the helicopter to face the building
 
 
-// Collision
 
-const collidables = []
+
+// ----------- Add Objects To Scene -----------
+
+// Floor
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(50, 50),
+  new THREE.MeshStandardMaterial({ color: 0x334455 })
+);
+floor.rotation.x = -Math.PI/2;
+scene.add(floor);
+collidables.push(floor);
+
+// Floor is invisible from below, though normally that's fine
+// const ceiling = new THREE.Mesh(
+//   new THREE.PlaneGeometry(50, 50),
+//   new THREE.MeshStandardMaterial({ color: 0x334455 })
+// );
+// ceiling.rotation.x = Math.PI/2;
+// scene.add(ceiling);
+// collidables.push(ceiling);
+
+
+// Models
+
+loadModel(
+  'assets/kenney_city_kit_commercial_2.1/Models/GLB format/building-skyscraper-a.glb',
+  [-2, 0, 0], //position
+  [2, 2, 2], //rotation
+  [0, 0, 0], //scale
+  (modelScene) => {
+    // Moved into loadModel, though might want its own function
+    // modelScene.position.set(5, 0, -10);
+    // modelScene.rotation.set(0, Math.PI/4, 0);
+    // modelScene.scale.set(2, 2, 2);
+  }
+)
+
+loadModel(
+  'assets/kenney_city_kit_commercial_2.1/Models/GLB format/building-skyscraper-b.glb',
+  [3, 0, 0], //position
+  [2, 2, 2], //rotation
+  [0, 0, 0], //scale
+  (modelScene) => {
+    // Moved into loadModel, though might want its own function
+    // modelScene.position.set(5, 0, -10);
+    // modelScene.rotation.set(0, Math.PI/4, 0);
+    // modelScene.scale.set(2, 2, 2);
+  }
+)
+
+
+// const loader = new GLTFLoader();
+
+function loadModel(
+                    path, 
+                    position,
+                    scale,
+                    rotation,
+                    onLoaded
+                  ) {
+  loader.load(
+    //path
+    path,
+    //success
+    (gltf) => {
+      const modelScene = gltf.scene;
+      scene.add(modelScene);
+
+      modelScene.position.set(...position);
+      modelScene.rotation.set(...rotation);
+      modelScene.scale.set(...scale);
+
+      modelScene.traverse((child) => {
+        if (child.isMesh) {
+          collidables.push(child);
+        }
+      });
+
+      onLoaded(modelScene);
+    },
+    //progress
+    null,
+    //error
+    (error) => console.error('Failed to load', path, error)
+  );
+}
+
+
+
+// ----------- Collision -----------
+
+// const collidables = []
 
 const HELICOPTER_RADIUS = 1.6;
 const raycaster = new THREE.Raycaster();
@@ -53,6 +145,7 @@ const raycaster = new THREE.Raycaster();
 const downCollider = new THREE.Vector3(0, -1, 0);
 const forwardCollider = new THREE.Vector3();
 const rightCollider = new THREE.Vector3();
+
 
 function checkCollisions() {
   const position = helicopterObject.position;
@@ -95,6 +188,7 @@ function checkCollisions() {
   resolveCollision(leftHits, leftCollider);
 }
 
+
 function resolveCollision(hits, directionVector) {
   if (hits.length > 0 && hits[0].distance < HELICOPTER_RADIUS) {
     helicopterObject.position.addScaledVector(directionVector, -(HELICOPTER_RADIUS - hits[0].distance));
@@ -103,34 +197,10 @@ function resolveCollision(hits, directionVector) {
 
 
 
-// Building
-const building = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 5, 1),
-  new THREE.MeshStandardMaterial({ color: 0x44aa88 })
-);
-building.position.y = 2.5;
-scene.add(building);
-collidables.push(building);
-
-
-// Floor
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ color: 0x334455 })
-);
-floor.rotation.x = -Math.PI/2;
-scene.add(floor);
-collidables.push(floor);
 
 
 
-
-
-
-
-
-
-// Movement
+// ----------- Movement -----------
 
 const keys = {};
 
@@ -143,7 +213,6 @@ const TURN_SPEED = 2.0;
 const forward = new THREE.Vector3();
 const right = new THREE.Vector3();
 const UP = new THREE.Vector3(0, 1, 0);
-
 
 
 function moveHelicopter(deltaTime) {
@@ -169,7 +238,8 @@ function moveHelicopter(deltaTime) {
 
 
 
-// ---- Render loop ----
+
+// ----------- Render loop -----------
 function animate(timestamp) {
   requestAnimationFrame(animate); // recursively call it again to loop
 
@@ -182,7 +252,8 @@ function animate(timestamp) {
   renderer.render(scene, camera);
 }
 
-// Initialize
+
+// ----------- Initialize -----------
+// initialize(animate(0)) // initialize the scene, call animate when done
 let lastTime = 0;
 animate(0);
-

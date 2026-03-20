@@ -60,7 +60,7 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 
 ## My Learning Order
 
-5. **Imported geometry** — load a real city to fly through
+5. **Imported geometry** — load a real city to fly through (models from kenney.nl)
 6. **Textures** — big visual payoff for low complexity
 7. **Shadows** — makes everything look dramatically more real
 8. **Shooting** — the fun begins - maybe more like "water bucket"
