@@ -60,7 +60,6 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 
 ## My Learning Order
 
-6. **Textures** — big visual payoff for low complexity
 7. **Shadows** — makes everything look dramatically more real
 8. **Shooting** — the fun begins - maybe more like "water bucket"
 9. **Enemies** — the game begins - maybe more like "citizens"
@@ -85,6 +84,8 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 - Exiting the helicopter, walking on foot
 - Store/Upgrades
 - Sounds and music
+- Skybox
+- Edge of the world: loop? collide? oblivion?
 
 ### Things That Came Up That We Might Not Need
 
@@ -98,3 +99,4 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 3. **Delta time** — fix this now before bad habits set in, it's a small change
 4. **Basic collision** — Suddenly the world feels solid
 5. **Imported geometry** — load a real city to fly through (models from kenney.nl)
+6. **Textures** — big visual payoff for low complexity
