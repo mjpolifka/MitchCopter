@@ -46,6 +46,42 @@ yawObject.position.add(velocity);
 
 ---
 
+**Technical foundations you'll hit soon**
+- **Asset loading screen / loading manager** — right now models and textures load asynchronously and the game just starts whenever. Three.js has a `LoadingManager` that tracks all pending loads and fires a callback when everything is ready. You'll want this before the world gets much bigger.
+- **Scene graph organization** — as you add more objects, dumping everything into `scene` gets unwieldy. You'll want to group things logically (all buildings in a `buildingsGroup`, all NPCs in an `npcsGroup`, etc.) for both organization and performance.
+- **Performance / culling** — a full city will have hundreds of objects. You'll need to only render what's near the helicopter. Three.js has frustum culling built in but you may also want distance-based culling or level-of-detail (LOD).
+
+**Gameplay systems you're missing**
+- **Save/load** — even just writing city state to `localStorage` so you don't lose progress
+- **Time of day** — SimCopter had this and it changes the feel dramatically. Rotating directional light + skybox color shift
+- **Win/fail conditions** — what ends a mission? Timer? Score threshold?
+- **Pedestrian/traffic simulation** — citizens need simple pathfinding along roads, cars need to follow routes
+
+**Game feel**
+- **Screen shake** — for crashes, explosions, near misses. Huge impact on arcade feel for minimal effort
+- **Minimap** — almost essential for a city navigation game
+- **Visual feedback** — numbers floating up, flashes, particles when you complete a mission action
+
+---
+
+## Questions Worth Answering Early
+
+**"Multiple squares equal one building"** — this is the hardest design problem on your list and worth thinking through now before you build the city loader. SimCopter solved it by having a separate building footprint layer. One approach: store large buildings as occupying multiple cells but anchored to one "origin" cell, with the others marked as "occupied by [origin coords]".
+
+**The `.sc2` file idea** — SimCity 2000 files are a real, documented format. People have reverse engineered them. That's an ambitious but very cool goal.
+
+**"Exiting the helicopter"** — this means building a full on-foot movement and collision system essentially separate from the helicopter system. Worth scoping carefully — it's a significant chunk of work.
+
+---
+
+## One Design Observation
+
+Your mission list (megaphone traffic jam, fire bucket) are both _reactive_ missions — something goes wrong and you fix it. SimCopter also had _proactive_ tasks like taxi/transport missions which give the player something to do between emergencies. Worth considering as a third mission type for pacing variety.
+
+Overall though this is a well-thought-out plan for a solo project. The city-from-file system is the right next big technical challenge after textures — everything else depends on having a real world to play in.
+
+---
+
 ## The Suggested Learning Order
 
 If I were building this from where you are now, I'd tackle things in roughly this sequence:
@@ -86,6 +122,7 @@ If I were building this from where you are now, I'd tackle things in roughly thi
 - Sounds and music
 - Skybox
 - Edge of the world: loop? collide? oblivion?
+- Fuel
 
 ### Things That Came Up That We Might Not Need
 
