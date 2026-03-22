@@ -6,8 +6,8 @@ const collidables = []
 const loader = new GLTFLoader();
 
 
-
-
+// Prime loading text
+document.getElementById('status').textContent = 'Waiting for city file...';
 
 // Enable loading-screen
 const dropZone = document.getElementById("drop-zone");
@@ -30,7 +30,7 @@ dropZone.addEventListener('drop', function(event) {
     fileReader.onload = function(e) {
       const bytes = new Uint8Array(e.target.result);
       const struct = sc2kparser.parse(bytes);
-      loadCity(struct.tiles);
+      loadCityFromFile(struct.tiles);
     };
     fileReader.readAsArrayBuffer(file);
   }, 1500);
@@ -40,24 +40,14 @@ dropZone.addEventListener('drop', function(event) {
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 
 
-function loadCity(tiles) {
+function loadCityFromFile(tiles) {
   document.getElementById('status').textContent = 'Reticulating splines...';
   console.log(tiles);
 
   setTimeout(() => {
-    startGame();
+    buildDemo(startGame);
   }, 1000);
 }
-
-
-// Use the status div for feedback
-document.getElementById('status').textContent = 'Waiting for city file...';
-
-
-
-
-
-
 
 
 
@@ -113,94 +103,98 @@ helicopterObject.rotation.y = Math.PI; // rotate the helicopter to face the buil
 
 const textureLoader = new THREE.TextureLoader();
 
-// Floor
-const floorTexture = textureLoader.load('assets/textures/grass.webp');
-floorTexture.wrapS = THREE.RepeatWrapping;
-floorTexture.wrapT = THREE.RepeatWrapping;
-floorTexture.repeat.set(20, 20);
+function buildDemo(onComplete) {
+  // Floor
+  const floorTexture = textureLoader.load('assets/textures/grass.webp');
+  floorTexture.wrapS = THREE.RepeatWrapping;
+  floorTexture.wrapT = THREE.RepeatWrapping;
+  floorTexture.repeat.set(20, 20);
+  
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(50, 50),
+    new THREE.MeshStandardMaterial({ map: floorTexture })
+  );
+  floor.rotation.x = -Math.PI/2;
+  scene.add(floor);
+  collidables.push(floor);
+  
+  // Ceiling
+  const ceilingTexture = textureLoader.load('assets/textures/concrete.webp');
+  ceilingTexture.wrapS = THREE.RepeatWrapping;
+  ceilingTexture.wrapT = THREE.RepeatWrapping;
+  ceilingTexture.repeat.set(20, 20);
+  
+  const ceiling = new THREE.Mesh(
+    new THREE.PlaneGeometry(50, 50),
+    new THREE.MeshStandardMaterial({ map: ceilingTexture })
+  );
+  ceiling.rotation.x = Math.PI/2;
+  scene.add(ceiling);
+  collidables.push(ceiling);
+  
+  // Building - comment out below Models
+  // const wallTex = textureLoader.load('assets/textures/concrete.webp');
+  // wallTex.wrapS = THREE.RepeatWrapping;
+  // wallTex.wrapT = THREE.RepeatWrapping;
+  // wallTex.repeat.set(2, 3); // 2 tiles wide, 3 tiles tall
+  
+  // const building = new THREE.Mesh(
+  //   new THREE.BoxGeometry(4, 8, 4),
+  //   new THREE.MeshStandardMaterial({ map: wallTex })
+  // );
+  // building.position.y = 4;
+  // scene.add(building);
+  // collidables.push(building);
+  
+  // Models
+  
+  loadModel(
+    'assets/buildings/building-skyscraper-a.glb',
+    [-2.5, 0, 0], //position
+    [2, 2, 2], //scale
+    [0, 0, 0], //rotation
+    (modelScene) => {
+      // Moved into loadModel, though might want its own function
+      // modelScene.position.set(5, 0, -10);
+      // modelScene.rotation.set(0, Math.PI/4, 0);
+      // modelScene.scale.set(2, 2, 2);
+    }
+  );
+  
+  loadModel(
+    'assets/buildings/building-skyscraper-b.glb',
+    [2.5, 0, 0], //position
+    [2, 2, 2], //scale
+    [0, 0, 0], //rotation
+    (modelScene) => {}
+  );
+  
+  loadModel(
+    'assets/roads/road-straight.glb',
+    [-2, 0, 2.5], //position
+    [2, 2, 2], //scale
+    [0, 0, 0], //rotation
+    (modelScene) => {}
+  );
+  
+  loadModel(
+    'assets/roads/road-straight.glb',
+    [0, 0, 2.5], //position
+    [2, 2, 2], //scale
+    [0, 0, 0], //rotation
+    (modelScene) => {}
+  );
+  
+  loadModel(
+    'assets/roads/road-straight.glb',
+    [2, 0, 2.5], //position
+    [2, 2, 2], //scale
+    [0, 0, 0], //rotation
+    (modelScene) => {}
+  );
 
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ map: floorTexture })
-);
-floor.rotation.x = -Math.PI/2;
-scene.add(floor);
-collidables.push(floor);
-
-// Ceiling
-const ceilingTexture = textureLoader.load('assets/textures/concrete.webp');
-ceilingTexture.wrapS = THREE.RepeatWrapping;
-ceilingTexture.wrapT = THREE.RepeatWrapping;
-ceilingTexture.repeat.set(20, 20);
-
-const ceiling = new THREE.Mesh(
-  new THREE.PlaneGeometry(50, 50),
-  new THREE.MeshStandardMaterial({ map: ceilingTexture })
-);
-ceiling.rotation.x = Math.PI/2;
-scene.add(ceiling);
-collidables.push(ceiling);
-
-// Building - comment out below Models
-// const wallTex = textureLoader.load('assets/textures/concrete.webp');
-// wallTex.wrapS = THREE.RepeatWrapping;
-// wallTex.wrapT = THREE.RepeatWrapping;
-// wallTex.repeat.set(2, 3); // 2 tiles wide, 3 tiles tall
-
-// const building = new THREE.Mesh(
-//   new THREE.BoxGeometry(4, 8, 4),
-//   new THREE.MeshStandardMaterial({ map: wallTex })
-// );
-// building.position.y = 4;
-// scene.add(building);
-// collidables.push(building);
-
-// Models
-
-loadModel(
-  'assets/buildings/building-skyscraper-a.glb',
-  [-2.5, 0, 0], //position
-  [2, 2, 2], //scale
-  [0, 0, 0], //rotation
-  (modelScene) => {
-    // Moved into loadModel, though might want its own function
-    // modelScene.position.set(5, 0, -10);
-    // modelScene.rotation.set(0, Math.PI/4, 0);
-    // modelScene.scale.set(2, 2, 2);
-  }
-)
-
-loadModel(
-  'assets/buildings/building-skyscraper-b.glb',
-  [2.5, 0, 0], //position
-  [2, 2, 2], //scale
-  [0, 0, 0], //rotation
-  (modelScene) => {}
-)
-
-loadModel(
-  'assets/roads/road-straight.glb',
-  [-2, 0, 2.5], //position
-  [2, 2, 2], //scale
-  [0, 0, 0], //rotation
-  (modelScene) => {}
-)
-
-loadModel(
-  'assets/roads/road-straight.glb',
-  [0, 0, 2.5], //position
-  [2, 2, 2], //scale
-  [0, 0, 0], //rotation
-  (modelScene) => {}
-)
-
-loadModel(
-  'assets/roads/road-straight.glb',
-  [2, 0, 2.5], //position
-  [2, 2, 2], //scale
-  [0, 0, 0], //rotation
-  (modelScene) => {}
-)
+  onComplete();
+}
 
 // const loader = new GLTFLoader(); // moved to top
 

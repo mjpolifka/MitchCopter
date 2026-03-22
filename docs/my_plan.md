@@ -63,7 +63,7 @@
   - ✔create "loading screen"
   - ✔parse a file to console
   - ✔switch screens
-- create altitude vertex map from tiles
+- >create altitude vertex map from tiles
 - iterate through map creating "floors" at the right altitude
   - divide the altitude data by 50 to get "1's"
   - use BufferGeometry and don't make 16k objects
