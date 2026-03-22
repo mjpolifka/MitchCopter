@@ -10,34 +10,37 @@
 
 - Load city from .sc2 file
   - ~~2x2 array for coords~~
-  - iterate through tiles returned from sc2kparser and build the world
+  - ✔iterate through tiles returned from sc2kparser and build the world
   - data includes: altitude, slope, building id, rotation, is_water, is_saltwater, corner data, underground
     - ✔have to figure out slope
     - ✔have to figure out corners
-      - corners seem to match iteration style, but map is 90deg off and flipped
-        - topRight = DP121
-        - bottomLeft = DR119
-        - topLeft = DP119
-        - bottomRight = DR121
+      - ✔corners seem to match iteration style, but map is 90deg off and flipped
+        - ✔file iterates right-to-left for w/e reason
   - using this, build prototypes on each other:
     - ✔altitude squares
     - ✔slope them
-    - >add buildings as colored boxes to verify map is correct
-      - refactor loadCityFromTiles for readability
-      - buildingIds
+    - ✔add buildings as colored boxes to verify map is correct
+      - ✔refactor loadCityFromTiles for readability
+      - ✔buildingIds
         - ✔00 is nothing
           - ✔don't render anything
         - ✔01-05 are destroyed
           - ✔don't render anything (for now)
         - ✔06-0D are parks
           - ✔short green block
-        - 0E-6F are infrastructure
-          - very short black block
-        - the rest are basically buildings
-          - standard grey block
-    - fix scaling issues and any discovered terrain issues
+        - ✔0E-6F are infrastructure
+          - ✔very short black block
+        - ✔the rest are basically buildings
+          - ✔standard grey block
+    - ✔fix terrain issues
+    - >how do we do the water?
+    - compare with original and fix scaling, check terrain
     - model aggregate buildings as single object
+      - the iterator is going to have to remember stuff
+      - can place the model using the first corner we come across
+      - but need to know what to not place later
     - add tunnels and subways
+    - fix bridges
 - Controls toggle (classic <-> modern)
 - Helicopter visual model (simple)
 - Physics model (speed, acceleration, inertia)
