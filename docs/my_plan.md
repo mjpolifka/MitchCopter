@@ -59,7 +59,11 @@
 
 - ✔include sc2kparser
   - ✔figure out ISC attribution requirements
-- >parse city into tiles
-- create altitude map from tiles
+- ✔parse city into tiles
+  - ✔create "loading screen"
+  - ✔parse a file to console
+  - ✔switch screens
+- create altitude vertex map from tiles
 - iterate through map creating "floors" at the right altitude
-  - divide the data by 50 to get "1's"
+  - divide the altitude data by 50 to get "1's"
+  - use BufferGeometry and don't make 16k objects
