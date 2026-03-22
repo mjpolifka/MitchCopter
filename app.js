@@ -132,68 +132,25 @@ function buildDemo(onComplete) {
   scene.add(ceiling);
   collidables.push(ceiling);
   
-  // Building - comment out below Models
-  // const wallTex = textureLoader.load('assets/textures/concrete.webp');
-  // wallTex.wrapS = THREE.RepeatWrapping;
-  // wallTex.wrapT = THREE.RepeatWrapping;
-  // wallTex.repeat.set(2, 3); // 2 tiles wide, 3 tiles tall
-  
-  // const building = new THREE.Mesh(
-  //   new THREE.BoxGeometry(4, 8, 4),
-  //   new THREE.MeshStandardMaterial({ map: wallTex })
-  // );
-  // building.position.y = 4;
-  // scene.add(building);
-  // collidables.push(building);
   
   // Models
-  
-  loadModel(
-    'assets/buildings/building-skyscraper-a.glb',
-    [-2.5, 0, 0], //position
-    [2, 2, 2], //scale
-    [0, 0, 0], //rotation
-    (modelScene) => {
-      // Moved into loadModel, though might want its own function
-      // modelScene.position.set(5, 0, -10);
-      // modelScene.rotation.set(0, Math.PI/4, 0);
-      // modelScene.scale.set(2, 2, 2);
-    }
-  );
-  
-  loadModel(
-    'assets/buildings/building-skyscraper-b.glb',
-    [2.5, 0, 0], //position
-    [2, 2, 2], //scale
-    [0, 0, 0], //rotation
-    (modelScene) => {}
-  );
-  
-  loadModel(
-    'assets/roads/road-straight.glb',
-    [-2, 0, 2.5], //position
-    [2, 2, 2], //scale
-    [0, 0, 0], //rotation
-    (modelScene) => {}
-  );
-  
-  loadModel(
-    'assets/roads/road-straight.glb',
-    [0, 0, 2.5], //position
-    [2, 2, 2], //scale
-    [0, 0, 0], //rotation
-    (modelScene) => {}
-  );
-  
-  loadModel(
-    'assets/roads/road-straight.glb',
-    [2, 0, 2.5], //position
-    [2, 2, 2], //scale
-    [0, 0, 0], //rotation
-    (modelScene) => {}
-  );
 
-  onComplete();
+  const modelPaths = [
+    { path: 'assets/buildings/building-skyscraper-a.glb', position: [-2.5, 0, 0], scale: [2,2,2], rotation: [0,0,0] },
+    { path: 'assets/buildings/building-skyscraper-b.glb', position: [2.5, 0, 0],  scale: [2,2,2], rotation: [0,0,0] },
+    { path: 'assets/roads/road-straight.glb',             position: [-2, 0, 2.5], scale: [2,2,2], rotation: [0,0,0] },
+    { path: 'assets/roads/road-straight.glb',             position: [0, 0, 2.5],  scale: [2,2,2], rotation: [0,0,0] },
+    { path: 'assets/roads/road-straight.glb',             position: [2, 0, 2.5],  scale: [2,2,2], rotation: [0,0,0] }
+  ];
+  
+  let remainingModels = modelPaths.length;
+
+  modelPaths.forEach(m => {
+    loadModel(m.path, m.position, m.scale, m.rotation, () => {
+      remainingModels--;
+      if (remainingModels === 0) onComplete();
+    });
+  });
 }
 
 // const loader = new GLTFLoader(); // moved to top
