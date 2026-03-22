@@ -199,11 +199,39 @@ function loadCityFromTiles(tiles) {
       // Create building
       const buildingId = tile.building ?? 0;
 
-      if (buildingId >= 0x06 && buildingId <= 0x0D) {
+      if (buildingId === 0) { // Nothing
+        // don't display anything
+      }
+      else if (buildingId >= 0x01 && buildingId <= 0x05) { // Rubble
+        // don't display anything
+      }
+      else if (buildingId >= 0x06 && buildingId <= 0x0D) { // Parks
         const buildingHeight = TILE_SIZE * 0.5;
         const building = new THREE.Mesh(
           new THREE.BoxGeometry(TILE_SIZE, buildingHeight, TILE_SIZE),
           new THREE.MeshStandardMaterial({ color: 0x00FF00 })
+        );
+        const slopedAlt = Math.max(yA, yB, yC, yD);
+        building.position.set(x, (buildingHeight / 2) + slopedAlt, z);
+        scene.add(building);
+        collidables.push(building);
+      }
+      else if (buildingId >= 0x0E && buildingId <= 0x6F) { // Road-likes
+        const buildingHeight = TILE_SIZE * 0.05;
+        const building = new THREE.Mesh(
+          new THREE.BoxGeometry(TILE_SIZE, buildingHeight, TILE_SIZE),
+          new THREE.MeshStandardMaterial({ color: 0x000000 })
+        );
+        const slopedAlt = Math.max(yA, yB, yC, yD);
+        building.position.set(x, (buildingHeight / 2) + slopedAlt, z);
+        scene.add(building);
+        collidables.push(building);
+      }
+      else { // Regular Buildings
+        const buildingHeight = TILE_SIZE * 3;
+        const building = new THREE.Mesh(
+          new THREE.BoxGeometry(TILE_SIZE, buildingHeight, TILE_SIZE),
+          new THREE.MeshStandardMaterial({ color: 0xBBBBBB })
         );
         const slopedAlt = Math.max(yA, yB, yC, yD);
         building.position.set(x, (buildingHeight / 2) + slopedAlt, z);
