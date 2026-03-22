@@ -57,9 +57,9 @@
 
 ### Altitude Squares
 
-- >include sc2kparser
-  - figure out ISC attribution requirements
-- parse city into tiles
+- ✔include sc2kparser
+  - ✔figure out ISC attribution requirements
+- >parse city into tiles
 - create altitude map from tiles
 - iterate through map creating "floors" at the right altitude
   - divide the data by 50 to get "1's"
