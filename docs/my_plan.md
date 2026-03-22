@@ -9,31 +9,33 @@
 ### Other Things We'll Need
 
 - Load city from .sc2 file
-  - 2x2 array for coords
-  - data includes: altitude, slope, asset id, rotation, is_water, is_saltwater, corner data, underground
-    - have to figure out slope
-    - have to figure out corners
-      - topRight = DP121
-      - bottomLeft = DR119
-      - topLeft = DP119
-      - bottomRight = DR121
+  - ~~2x2 array for coords~~
+  - iterate through tiles returned from sc2kparser and build the world
+  - data includes: altitude, slope, building id, rotation, is_water, is_saltwater, corner data, underground
+    - ✔have to figure out slope
+    - ✔have to figure out corners
+      - corners seem to match iteration style, but map is 90deg off and flipped
+        - topRight = DP121
+        - bottomLeft = DR119
+        - topLeft = DP119
+        - bottomRight = DR121
   - using this, build prototypes on each other:
-    - altitude squares
-    - slope them
-    - add water w/ color
-    - add building ids w/ color
-    - model aggregate buildings
-    - add kenney assets
-  - then create my own assets
+    - ✔altitude squares
+    - ✔slope them
+    - >add buildings as colored boxes to verify map is correct
+    - fix scaling issues and any discovered terrain issues
+    - model aggregate buildings as single object
+    - add tunnels and subways
 - Controls toggle (classic <-> modern)
-- Helicopter visual model
+- Helicopter visual model (simple)
 - Physics model (speed, acceleration, inertia)
 - Multiple cameras (down view, 3rd-person view)
 - HUD/UI
-- Mission loops
-  - Traffic Jam (use megaphone)
-  - Fire (use bucket)
-- Exiting the helicopter, walking on foot
+- Car traffic -> Traffic Jam mission
+- Citizens -> Transport mission
+- Exiting the helicopter, walking on foot -> Medevac mission
+- Fire bucket -> Fire mission
+- Custom assets
 - Store/Upgrades
 - Sounds and music
   - Funny commercials are required
@@ -55,7 +57,7 @@
 5. **Imported geometry** — load a real city to fly through (models from kenney.nl)
 6. **Textures** — big visual payoff for low complexity
 
-### Altitude Squares
+### Altitude Squares (+Slope)
 
 - ✔include sc2kparser
   - ✔figure out ISC attribution requirements
