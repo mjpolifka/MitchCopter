@@ -16,14 +16,27 @@
   </script>
 </head>
 <body>
-  <div id="controls-panel">
+  
+  <div id="game-screen" style="display: none;"></div>
+
+  <div id="controls-panel" style="display: none;">
     <h3>Controls</h3>
     <p>↑ ↓ — Forward / Back</p>
     <p>← → — Turn Left / Right</p>
     <p>A S — Strafe Left / Right</p>
     <p>Q W — Ascend / Descend</p>
   </div>
-  <script type="module" src="app.js"></script>
 
+  <div id="loading-screen">
+    <h1>MitchCopter</h1>
+    <h3>Drop your .sc2 file to begin</h3>
+    <div id="drop-zone">Drop File Here</div>
+    <div id="status"></div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script type="module">
+
+  </script>
 </body>
 </html>

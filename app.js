@@ -1,8 +1,69 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import sc2kparser from './src/sc2kparser.js'
 
 const collidables = []
 const loader = new GLTFLoader();
+
+
+
+
+
+// Enable loading-screen
+const dropZone = document.getElementById("drop-zone");
+
+dropZone.addEventListener('dragover', function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  dropZone.classList.add('drag-over')
+}, false);
+
+dropZone.addEventListener('drop', function(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  dropZone.classList.remove('drag-over')
+  document.getElementById('status').textContent = 'Parsing city file...';
+  const file = event.dataTransfer.files[0];
+
+  setTimeout(() => {
+    const fileReader = new FileReader();
+    fileReader.onload = function(e) {
+      const bytes = new Uint8Array(e.target.result);
+      const struct = sc2kparser.parse(bytes);
+      loadCity(struct.tiles);
+    };
+    fileReader.readAsArrayBuffer(file);
+  }, 1500);
+  
+}, false);
+
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+
+function loadCity(tiles) {
+  document.getElementById('status').textContent = 'Reticulating splines...';
+  console.log(tiles);
+
+  setTimeout(() => {
+    startGame();
+  }, 1000);
+}
+
+
+// Use the status div for feedback
+document.getElementById('status').textContent = 'Waiting for city file...';
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Scene
 const scene = new THREE.Scene();
@@ -11,7 +72,8 @@ scene.background = new THREE.Color(0x202533);
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+// document.body.appendChild(renderer.domElement);
+document.getElementById("game-screen").appendChild(renderer.domElement);
 
 // Handle window resize
 window.addEventListener('resize', () => {
@@ -282,7 +344,9 @@ function moveHelicopter(deltaTime) {
 
 
 
-// ----------- Render loop -----------
+// ----------- Render Loop and Game Start -----------
+let lastTime = 0;
+
 function animate(timestamp) {
   requestAnimationFrame(animate); // recursively call it again to loop
 
@@ -295,8 +359,9 @@ function animate(timestamp) {
   renderer.render(scene, camera);
 }
 
-
-// ----------- Initialize -----------
-// initialize(animate(0)) // initialize the scene, call animate when done
-let lastTime = 0;
-animate(0);
+function startGame() {
+  document.getElementById("loading-screen").style.display = 'none';
+  document.getElementById("controls-panel").style.display = 'block';
+  document.getElementById("game-screen").style.display = 'block';
+  animate(0);
+}
