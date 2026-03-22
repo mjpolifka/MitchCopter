@@ -23,6 +23,18 @@
     - ✔altitude squares
     - ✔slope them
     - >add buildings as colored boxes to verify map is correct
+      - refactor loadCityFromTiles for readability
+      - buildingIds
+        - ✔00 is nothing
+          - ✔don't render anything
+        - ✔01-05 are destroyed
+          - ✔don't render anything (for now)
+        - ✔06-0D are parks
+          - ✔short green block
+        - 0E-6F are infrastructure
+          - very short black block
+        - the rest are basically buildings
+          - standard grey block
     - fix scaling issues and any discovered terrain issues
     - model aggregate buildings as single object
     - add tunnels and subways

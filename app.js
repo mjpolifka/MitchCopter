@@ -55,36 +55,42 @@ function loadCityFromTiles(tiles) {
   // iterate through tiles and fire off whatever needs to happen
   const TILE_SIZE = 1;
   const HEIGHT_SCALE = 1;
-  const GRID = 128; // Math.Sqrt(tiles)?  Then I can make bigger cities later
+  const GRID = 128; // Math.Sqrt(tiles.length)?  Then I can make bigger cities later
 
   const positions = [];
 
+  // ---------- TILE ITERATOR ----------
   for (let row = 0; row < GRID; row++) {
-    for (let col = 0; col < GRID; col++) {
+    for (let col = GRID - 1; col >= 0; col--) {
       const tile = tiles[row * GRID + col];
-      const alt = (tile.alt ?? 0) / 50;  // alt comes in multiples of 50
-      const slope = tile.terrain?.slope ?? [0, 0, 0, 0];
-
       const x = col * TILE_SIZE;
       const z = row * TILE_SIZE;
 
-      // 4 corner heights  [topLeft, topRight, bottomLeft, bottomRight]
-      const yA = (alt + slope[0]) * HEIGHT_SCALE;  // top-left
-      const yB = (alt + slope[1]) * HEIGHT_SCALE;  // top-right
-      const yC = (alt + slope[2]) * HEIGHT_SCALE;  // bottom-left
-      const yD = (alt + slope[3]) * HEIGHT_SCALE;  // bottom-right
+      // Generate Terrain
+      const alt = (tile.alt ?? 0) / 50;  // alt comes in multiples of 50
+      const slope = tile.terrain?.slope ?? [0, 0, 0, 0];
 
+      // 4 corner heights  [topLeft, topRight, bottomLeft, bottomRight]
+      const yA = (alt + slope[1]) * HEIGHT_SCALE;  // top-left
+      const yB = (alt + slope[0]) * HEIGHT_SCALE;  // top-right
+      const yC = (alt + slope[3]) * HEIGHT_SCALE;  // bottom-left
+      const yD = (alt + slope[2]) * HEIGHT_SCALE;  // bottom-right
+
+      const terrainX = x - (TILE_SIZE / 2); // move tile corner so x is the center
+      const terrainZ = z - (TILE_SIZE / 2); // move tile corner so z is the center
+
+      // Generate top surfaces
       // Triangle 1: A, C, D
-      positions.push(x,        yA, z);
-      positions.push(x,        yC, z + TILE_SIZE);
-      positions.push(x + TILE_SIZE, yD, z + TILE_SIZE);
+      positions.push(terrainX,        yA, terrainZ);
+      positions.push(terrainX,        yC, terrainZ + TILE_SIZE);
+      positions.push(terrainX + TILE_SIZE, yD, terrainZ + TILE_SIZE);
 
       // Triangle 2: A, D, B
-      positions.push(x,        yA, z);
-      positions.push(x + TILE_SIZE, yD, z + TILE_SIZE);
-      positions.push(x + TILE_SIZE, yB, z);
+      positions.push(terrainX,        yA, terrainZ);
+      positions.push(terrainX + TILE_SIZE, yD, terrainZ + TILE_SIZE);
+      positions.push(terrainX + TILE_SIZE, yB, terrainZ);
 
-      // After building the top surface of each tile, check right neighbor
+      // After building the top surface of each tile, check right neighbor and generate skirt
       if (col < GRID - 1) {
         const rightTile = tiles[row * GRID + (col + 1)];
         const rightAlt = (rightTile.alt ?? 0) / 50;
@@ -95,8 +101,8 @@ function loadCityFromTiles(tiles) {
         const bottomY = yD;  // current tile bottom-right
 
         // left edge of right neighbor
-        const rightTopY    = (rightAlt + rightSlope[0]) * HEIGHT_SCALE;
-        const rightBottomY = (rightAlt + rightSlope[2]) * HEIGHT_SCALE;
+        const rightTopY    = (rightAlt + rightSlope[1]) * HEIGHT_SCALE;
+        const rightBottomY = (rightAlt + rightSlope[3]) * HEIGHT_SCALE;
 
         // fill the wall if there's a gap
         const wallTopY    = Math.min(topY, rightTopY);
@@ -104,13 +110,13 @@ function loadCityFromTiles(tiles) {
 
         if (topY !== rightTopY || bottomY !== rightBottomY) {
           // quad between the two edges
-          positions.push(x + TILE_SIZE, topY,       z);
-          positions.push(x + TILE_SIZE, wallTopY,   z);
-          positions.push(x + TILE_SIZE, wallBottomY, z + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, topY,       terrainZ);
+          positions.push(terrainX + TILE_SIZE, wallTopY,   terrainZ);
+          positions.push(terrainX + TILE_SIZE, wallBottomY, terrainZ + TILE_SIZE);
 
-          positions.push(x + TILE_SIZE, topY,        z);
-          positions.push(x + TILE_SIZE, wallBottomY, z + TILE_SIZE);
-          positions.push(x + TILE_SIZE, bottomY,     z + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, topY,        terrainZ);
+          positions.push(terrainX + TILE_SIZE, wallBottomY, terrainZ + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, bottomY,     terrainZ + TILE_SIZE);
         }
       }
 
@@ -125,32 +131,19 @@ function loadCityFromTiles(tiles) {
         const rightY = yD;  // current tile bottom-right
 
         // top edge of bottom neighbor
-        const neighborLeftY  = (bottomAlt + bottomSlope[0]) * HEIGHT_SCALE;
-        const neighborRightY = (bottomAlt + bottomSlope[1]) * HEIGHT_SCALE;
-
-        // if (leftY !== neighborLeftY || rightY !== neighborRightY) {
-        //   const wallLeftY  = Math.min(leftY, neighborLeftY);
-        //   const wallRightY = Math.min(rightY, neighborRightY);
-
-        //   positions.push(x,            leftY,     z + TILE_SIZE);
-        //   positions.push(x,            wallLeftY, z + TILE_SIZE);
-        //   positions.push(x + TILE_SIZE, wallRightY, z + TILE_SIZE);
-
-        //   positions.push(x,            leftY,      z + TILE_SIZE);
-        //   positions.push(x + TILE_SIZE, wallRightY, z + TILE_SIZE);
-        //   positions.push(x + TILE_SIZE, rightY,     z + TILE_SIZE);
-        // }
+        const neighborLeftY  = (bottomAlt + bottomSlope[1]) * HEIGHT_SCALE;
+        const neighborRightY = (bottomAlt + bottomSlope[0]) * HEIGHT_SCALE;
 
         if (leftY !== neighborLeftY || rightY !== neighborRightY) {
           // Triangle 1
-          positions.push(x,             leftY,      z + TILE_SIZE);
-          positions.push(x,             neighborLeftY, z + TILE_SIZE);
-          positions.push(x + TILE_SIZE, neighborRightY, z + TILE_SIZE);
+          positions.push(terrainX,             leftY,      terrainZ + TILE_SIZE);
+          positions.push(terrainX,             neighborLeftY, terrainZ + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, neighborRightY, terrainZ + TILE_SIZE);
 
           // Triangle 2
-          positions.push(x,             leftY,       z + TILE_SIZE);
-          positions.push(x + TILE_SIZE, neighborRightY, z + TILE_SIZE);
-          positions.push(x + TILE_SIZE, rightY,      z + TILE_SIZE);
+          positions.push(terrainX,             leftY,       terrainZ + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, neighborRightY, terrainZ + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, rightY,      terrainZ + TILE_SIZE);
         }
       }
 
@@ -163,17 +156,17 @@ function loadCityFromTiles(tiles) {
         const curTopY    = yA;  // current tile top-left
         const curBottomY = yC;  // current tile bottom-left
 
-        const neighborTopY    = (leftAlt + leftSlope[1]) * HEIGHT_SCALE;  // right edge of left neighbor
-        const neighborBottomY = (leftAlt + leftSlope[3]) * HEIGHT_SCALE;
+        const neighborTopY    = (leftAlt + leftSlope[0]) * HEIGHT_SCALE;  // right edge of left neighbor
+        const neighborBottomY = (leftAlt + leftSlope[2]) * HEIGHT_SCALE;
 
         if (curTopY !== neighborTopY || curBottomY !== neighborBottomY) {
-          positions.push(x, curTopY,      z);
-          positions.push(x, neighborTopY, z);
-          positions.push(x, neighborBottomY, z + TILE_SIZE);
+          positions.push(terrainX, curTopY,      terrainZ);
+          positions.push(terrainX, neighborTopY, terrainZ);
+          positions.push(terrainX, neighborBottomY, terrainZ + TILE_SIZE);
 
-          positions.push(x, curTopY,         z);
-          positions.push(x, neighborBottomY, z + TILE_SIZE);
-          positions.push(x, curBottomY,      z + TILE_SIZE);
+          positions.push(terrainX, curTopY,         terrainZ);
+          positions.push(terrainX, neighborBottomY, terrainZ + TILE_SIZE);
+          positions.push(terrainX, curBottomY,      terrainZ + TILE_SIZE);
         }
       }
 
@@ -186,21 +179,69 @@ function loadCityFromTiles(tiles) {
         const curLeftY  = yA;  // current tile top-left
         const curRightY = yB;  // current tile top-right
 
-        const neighborLeftY  = (topAlt + topSlope[2]) * HEIGHT_SCALE;  // bottom edge of top neighbor
-        const neighborRightY = (topAlt + topSlope[3]) * HEIGHT_SCALE;
+        const neighborLeftY  = (topAlt + topSlope[3]) * HEIGHT_SCALE;  // bottom edge of top neighbor
+        const neighborRightY = (topAlt + topSlope[2]) * HEIGHT_SCALE;
 
         if (curLeftY !== neighborLeftY || curRightY !== neighborRightY) {
-          positions.push(x,             curLeftY,      z);
-          positions.push(x,             neighborLeftY, z);
-          positions.push(x + TILE_SIZE, neighborRightY, z);
+          positions.push(terrainX,             curLeftY,      terrainZ);
+          positions.push(terrainX,             neighborLeftY, terrainZ);
+          positions.push(terrainX + TILE_SIZE, neighborRightY, terrainZ);
 
-          positions.push(x,             curLeftY,       z);
-          positions.push(x + TILE_SIZE, neighborRightY, z);
-          positions.push(x + TILE_SIZE, curRightY,      z);
+          positions.push(terrainX,             curLeftY,       terrainZ);
+          positions.push(terrainX + TILE_SIZE, neighborRightY, terrainZ);
+          positions.push(terrainX + TILE_SIZE, curRightY,      terrainZ);
         }
       }
-    }
-  }
+
+
+
+
+      // Create building
+      const buildingId = tile.building ?? 0;
+
+      if (buildingId === 0) { // Nothing
+        // don't display anything
+      }
+      else if (buildingId >= 0x01 && buildingId <= 0x05) { // Rubble
+        // don't display anything
+      }
+      else if (buildingId >= 0x06 && buildingId <= 0x0D) { // Parks
+        const buildingHeight = TILE_SIZE * 0.5;
+        const building = new THREE.Mesh(
+          new THREE.BoxGeometry(TILE_SIZE, buildingHeight, TILE_SIZE),
+          new THREE.MeshStandardMaterial({ color: 0x00FF00 })
+        );
+        const slopedAlt = Math.max(yA, yB, yC, yD);
+        building.position.set(x, (buildingHeight / 2) + slopedAlt, z);
+        scene.add(building);
+        collidables.push(building);
+      }
+      else if (buildingId >= 0x0E && buildingId <= 0x6F) { // Road-likes
+        const buildingHeight = TILE_SIZE * 0.05;
+        const building = new THREE.Mesh(
+          new THREE.BoxGeometry(TILE_SIZE, buildingHeight, TILE_SIZE),
+          new THREE.MeshStandardMaterial({ color: 0x000000 })
+        );
+        const slopedAlt = Math.max(yA, yB, yC, yD);
+        building.position.set(x, (buildingHeight / 2) + slopedAlt, z);
+        scene.add(building);
+        collidables.push(building);
+      }
+      else { // Regular Buildings
+        const buildingHeight = TILE_SIZE * 3;
+        const building = new THREE.Mesh(
+          new THREE.BoxGeometry(TILE_SIZE, buildingHeight, TILE_SIZE),
+          new THREE.MeshStandardMaterial({ color: 0xBBBBBB })
+        );
+        const slopedAlt = Math.max(yA, yB, yC, yD);
+        building.position.set(x, (buildingHeight / 2) + slopedAlt, z);
+        scene.add(building);
+        collidables.push(building);
+      }
+
+
+    } // end for(col)
+  } // end for(row)
 
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
@@ -470,6 +511,8 @@ function moveHelicopter(deltaTime) {
 
   if (keys['KeyQ']) helicopterObject.position.addScaledVector(UP,  SPEED * deltaTime);
   if (keys['KeyW']) helicopterObject.position.addScaledVector(UP,  -SPEED * deltaTime);
+
+  if (keys['KeyI']) helicopterObject.position.addScaledVector(forward, SPEED * deltaTime * 10);
 }
 
 
