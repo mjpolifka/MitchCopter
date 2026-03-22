@@ -62,11 +62,13 @@ function loadCityFromTiles(tiles) {
   for (let row = 0; row < GRID; row++) {
     for (let col = 0; col < GRID; col++) {
       const tile = tiles[row * GRID + col];
+      const x = col * TILE_SIZE;
+      const z = row * TILE_SIZE;
+
+      // Generate Terrain
       const alt = (tile.alt ?? 0) / 50;  // alt comes in multiples of 50
       const slope = tile.terrain?.slope ?? [0, 0, 0, 0];
 
-      const x = col * TILE_SIZE;
-      const z = row * TILE_SIZE;
 
       // 4 corner heights  [topLeft, topRight, bottomLeft, bottomRight]
       const yA = (alt + slope[0]) * HEIGHT_SCALE;  // top-left
@@ -74,15 +76,18 @@ function loadCityFromTiles(tiles) {
       const yC = (alt + slope[2]) * HEIGHT_SCALE;  // bottom-left
       const yD = (alt + slope[3]) * HEIGHT_SCALE;  // bottom-right
 
+      const terrainX = x - (TILE_SIZE / 2); // move tile corner so x is the center
+      const terrainZ = z - (TILE_SIZE / 2); // move tile corner so z is the center
+
       // Triangle 1: A, C, D
-      positions.push(x,        yA, z);
-      positions.push(x,        yC, z + TILE_SIZE);
-      positions.push(x + TILE_SIZE, yD, z + TILE_SIZE);
+      positions.push(terrainX,        yA, terrainZ);
+      positions.push(terrainX,        yC, terrainZ + TILE_SIZE);
+      positions.push(terrainX + TILE_SIZE, yD, terrainZ + TILE_SIZE);
 
       // Triangle 2: A, D, B
-      positions.push(x,        yA, z);
-      positions.push(x + TILE_SIZE, yD, z + TILE_SIZE);
-      positions.push(x + TILE_SIZE, yB, z);
+      positions.push(terrainX,        yA, terrainZ);
+      positions.push(terrainX + TILE_SIZE, yD, terrainZ + TILE_SIZE);
+      positions.push(terrainX + TILE_SIZE, yB, terrainZ);
 
       // After building the top surface of each tile, check right neighbor
       if (col < GRID - 1) {
@@ -104,13 +109,13 @@ function loadCityFromTiles(tiles) {
 
         if (topY !== rightTopY || bottomY !== rightBottomY) {
           // quad between the two edges
-          positions.push(x + TILE_SIZE, topY,       z);
-          positions.push(x + TILE_SIZE, wallTopY,   z);
-          positions.push(x + TILE_SIZE, wallBottomY, z + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, topY,       terrainZ);
+          positions.push(terrainX + TILE_SIZE, wallTopY,   terrainZ);
+          positions.push(terrainX + TILE_SIZE, wallBottomY, terrainZ + TILE_SIZE);
 
-          positions.push(x + TILE_SIZE, topY,        z);
-          positions.push(x + TILE_SIZE, wallBottomY, z + TILE_SIZE);
-          positions.push(x + TILE_SIZE, bottomY,     z + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, topY,        terrainZ);
+          positions.push(terrainX + TILE_SIZE, wallBottomY, terrainZ + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, bottomY,     terrainZ + TILE_SIZE);
         }
       }
 
@@ -128,29 +133,16 @@ function loadCityFromTiles(tiles) {
         const neighborLeftY  = (bottomAlt + bottomSlope[0]) * HEIGHT_SCALE;
         const neighborRightY = (bottomAlt + bottomSlope[1]) * HEIGHT_SCALE;
 
-        // if (leftY !== neighborLeftY || rightY !== neighborRightY) {
-        //   const wallLeftY  = Math.min(leftY, neighborLeftY);
-        //   const wallRightY = Math.min(rightY, neighborRightY);
-
-        //   positions.push(x,            leftY,     z + TILE_SIZE);
-        //   positions.push(x,            wallLeftY, z + TILE_SIZE);
-        //   positions.push(x + TILE_SIZE, wallRightY, z + TILE_SIZE);
-
-        //   positions.push(x,            leftY,      z + TILE_SIZE);
-        //   positions.push(x + TILE_SIZE, wallRightY, z + TILE_SIZE);
-        //   positions.push(x + TILE_SIZE, rightY,     z + TILE_SIZE);
-        // }
-
         if (leftY !== neighborLeftY || rightY !== neighborRightY) {
           // Triangle 1
-          positions.push(x,             leftY,      z + TILE_SIZE);
-          positions.push(x,             neighborLeftY, z + TILE_SIZE);
-          positions.push(x + TILE_SIZE, neighborRightY, z + TILE_SIZE);
+          positions.push(terrainX,             leftY,      terrainZ + TILE_SIZE);
+          positions.push(terrainX,             neighborLeftY, terrainZ + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, neighborRightY, terrainZ + TILE_SIZE);
 
           // Triangle 2
-          positions.push(x,             leftY,       z + TILE_SIZE);
-          positions.push(x + TILE_SIZE, neighborRightY, z + TILE_SIZE);
-          positions.push(x + TILE_SIZE, rightY,      z + TILE_SIZE);
+          positions.push(terrainX,             leftY,       terrainZ + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, neighborRightY, terrainZ + TILE_SIZE);
+          positions.push(terrainX + TILE_SIZE, rightY,      terrainZ + TILE_SIZE);
         }
       }
 
@@ -167,13 +159,13 @@ function loadCityFromTiles(tiles) {
         const neighborBottomY = (leftAlt + leftSlope[3]) * HEIGHT_SCALE;
 
         if (curTopY !== neighborTopY || curBottomY !== neighborBottomY) {
-          positions.push(x, curTopY,      z);
-          positions.push(x, neighborTopY, z);
-          positions.push(x, neighborBottomY, z + TILE_SIZE);
+          positions.push(terrainX, curTopY,      terrainZ);
+          positions.push(terrainX, neighborTopY, terrainZ);
+          positions.push(terrainX, neighborBottomY, terrainZ + TILE_SIZE);
 
-          positions.push(x, curTopY,         z);
-          positions.push(x, neighborBottomY, z + TILE_SIZE);
-          positions.push(x, curBottomY,      z + TILE_SIZE);
+          positions.push(terrainX, curTopY,         terrainZ);
+          positions.push(terrainX, neighborBottomY, terrainZ + TILE_SIZE);
+          positions.push(terrainX, curBottomY,      terrainZ + TILE_SIZE);
         }
       }
 
@@ -190,13 +182,13 @@ function loadCityFromTiles(tiles) {
         const neighborRightY = (topAlt + topSlope[3]) * HEIGHT_SCALE;
 
         if (curLeftY !== neighborLeftY || curRightY !== neighborRightY) {
-          positions.push(x,             curLeftY,      z);
-          positions.push(x,             neighborLeftY, z);
-          positions.push(x + TILE_SIZE, neighborRightY, z);
+          positions.push(terrainX,             curLeftY,      terrainZ);
+          positions.push(terrainX,             neighborLeftY, terrainZ);
+          positions.push(terrainX + TILE_SIZE, neighborRightY, terrainZ);
 
-          positions.push(x,             curLeftY,       z);
-          positions.push(x + TILE_SIZE, neighborRightY, z);
-          positions.push(x + TILE_SIZE, curRightY,      z);
+          positions.push(terrainX,             curLeftY,       terrainZ);
+          positions.push(terrainX + TILE_SIZE, neighborRightY, terrainZ);
+          positions.push(terrainX + TILE_SIZE, curRightY,      terrainZ);
         }
       }
     }
