@@ -61,7 +61,7 @@ function loadCityFromTiles(tiles) {
 
   // ---------- TILE ITERATOR ----------
   for (let row = 0; row < GRID; row++) {
-    for (let col = 0; col < GRID; col++) {
+    for (let col = GRID - 1; col >= 0; col--) {
       const tile = tiles[row * GRID + col];
       const x = col * TILE_SIZE;
       const z = row * TILE_SIZE;
@@ -71,10 +71,10 @@ function loadCityFromTiles(tiles) {
       const slope = tile.terrain?.slope ?? [0, 0, 0, 0];
 
       // 4 corner heights  [topLeft, topRight, bottomLeft, bottomRight]
-      const yA = (alt + slope[0]) * HEIGHT_SCALE;  // top-left
-      const yB = (alt + slope[1]) * HEIGHT_SCALE;  // top-right
-      const yC = (alt + slope[2]) * HEIGHT_SCALE;  // bottom-left
-      const yD = (alt + slope[3]) * HEIGHT_SCALE;  // bottom-right
+      const yA = (alt + slope[1]) * HEIGHT_SCALE;  // top-left
+      const yB = (alt + slope[0]) * HEIGHT_SCALE;  // top-right
+      const yC = (alt + slope[3]) * HEIGHT_SCALE;  // bottom-left
+      const yD = (alt + slope[2]) * HEIGHT_SCALE;  // bottom-right
 
       const terrainX = x - (TILE_SIZE / 2); // move tile corner so x is the center
       const terrainZ = z - (TILE_SIZE / 2); // move tile corner so z is the center
@@ -101,8 +101,8 @@ function loadCityFromTiles(tiles) {
         const bottomY = yD;  // current tile bottom-right
 
         // left edge of right neighbor
-        const rightTopY    = (rightAlt + rightSlope[0]) * HEIGHT_SCALE;
-        const rightBottomY = (rightAlt + rightSlope[2]) * HEIGHT_SCALE;
+        const rightTopY    = (rightAlt + rightSlope[1]) * HEIGHT_SCALE;
+        const rightBottomY = (rightAlt + rightSlope[3]) * HEIGHT_SCALE;
 
         // fill the wall if there's a gap
         const wallTopY    = Math.min(topY, rightTopY);
@@ -131,8 +131,8 @@ function loadCityFromTiles(tiles) {
         const rightY = yD;  // current tile bottom-right
 
         // top edge of bottom neighbor
-        const neighborLeftY  = (bottomAlt + bottomSlope[0]) * HEIGHT_SCALE;
-        const neighborRightY = (bottomAlt + bottomSlope[1]) * HEIGHT_SCALE;
+        const neighborLeftY  = (bottomAlt + bottomSlope[1]) * HEIGHT_SCALE;
+        const neighborRightY = (bottomAlt + bottomSlope[0]) * HEIGHT_SCALE;
 
         if (leftY !== neighborLeftY || rightY !== neighborRightY) {
           // Triangle 1
@@ -156,8 +156,8 @@ function loadCityFromTiles(tiles) {
         const curTopY    = yA;  // current tile top-left
         const curBottomY = yC;  // current tile bottom-left
 
-        const neighborTopY    = (leftAlt + leftSlope[1]) * HEIGHT_SCALE;  // right edge of left neighbor
-        const neighborBottomY = (leftAlt + leftSlope[3]) * HEIGHT_SCALE;
+        const neighborTopY    = (leftAlt + leftSlope[0]) * HEIGHT_SCALE;  // right edge of left neighbor
+        const neighborBottomY = (leftAlt + leftSlope[2]) * HEIGHT_SCALE;
 
         if (curTopY !== neighborTopY || curBottomY !== neighborBottomY) {
           positions.push(terrainX, curTopY,      terrainZ);
@@ -179,8 +179,8 @@ function loadCityFromTiles(tiles) {
         const curLeftY  = yA;  // current tile top-left
         const curRightY = yB;  // current tile top-right
 
-        const neighborLeftY  = (topAlt + topSlope[2]) * HEIGHT_SCALE;  // bottom edge of top neighbor
-        const neighborRightY = (topAlt + topSlope[3]) * HEIGHT_SCALE;
+        const neighborLeftY  = (topAlt + topSlope[3]) * HEIGHT_SCALE;  // bottom edge of top neighbor
+        const neighborRightY = (topAlt + topSlope[2]) * HEIGHT_SCALE;
 
         if (curLeftY !== neighborLeftY || curRightY !== neighborRightY) {
           positions.push(terrainX,             curLeftY,      terrainZ);
@@ -205,7 +205,8 @@ function loadCityFromTiles(tiles) {
           new THREE.BoxGeometry(TILE_SIZE, buildingHeight, TILE_SIZE),
           new THREE.MeshStandardMaterial({ color: 0x00FF00 })
         );
-        building.position.set(x, (buildingHeight / 2) + alt, z);
+        const slopedAlt = Math.max(yA, yB, yC, yD);
+        building.position.set(x, (buildingHeight / 2) + slopedAlt, z);
         scene.add(building);
         collidables.push(building);
       }
@@ -482,6 +483,8 @@ function moveHelicopter(deltaTime) {
 
   if (keys['KeyQ']) helicopterObject.position.addScaledVector(UP,  SPEED * deltaTime);
   if (keys['KeyW']) helicopterObject.position.addScaledVector(UP,  -SPEED * deltaTime);
+
+  if (keys['KeyI']) helicopterObject.position.addScaledVector(forward, SPEED * deltaTime * 10);
 }
 
 
