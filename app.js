@@ -55,10 +55,11 @@ function loadCityFromTiles(tiles) {
   // iterate through tiles and fire off whatever needs to happen
   const TILE_SIZE = 1;
   const HEIGHT_SCALE = 1;
-  const GRID = 128; // Math.Sqrt(tiles)?  Then I can make bigger cities later
+  const GRID = 128; // Math.Sqrt(tiles.length)?  Then I can make bigger cities later
 
   const positions = [];
 
+  // ---------- TILE ITERATOR ----------
   for (let row = 0; row < GRID; row++) {
     for (let col = 0; col < GRID; col++) {
       const tile = tiles[row * GRID + col];
@@ -69,7 +70,6 @@ function loadCityFromTiles(tiles) {
       const alt = (tile.alt ?? 0) / 50;  // alt comes in multiples of 50
       const slope = tile.terrain?.slope ?? [0, 0, 0, 0];
 
-
       // 4 corner heights  [topLeft, topRight, bottomLeft, bottomRight]
       const yA = (alt + slope[0]) * HEIGHT_SCALE;  // top-left
       const yB = (alt + slope[1]) * HEIGHT_SCALE;  // top-right
@@ -79,6 +79,7 @@ function loadCityFromTiles(tiles) {
       const terrainX = x - (TILE_SIZE / 2); // move tile corner so x is the center
       const terrainZ = z - (TILE_SIZE / 2); // move tile corner so z is the center
 
+      // Generate top surfaces
       // Triangle 1: A, C, D
       positions.push(terrainX,        yA, terrainZ);
       positions.push(terrainX,        yC, terrainZ + TILE_SIZE);
@@ -89,7 +90,7 @@ function loadCityFromTiles(tiles) {
       positions.push(terrainX + TILE_SIZE, yD, terrainZ + TILE_SIZE);
       positions.push(terrainX + TILE_SIZE, yB, terrainZ);
 
-      // After building the top surface of each tile, check right neighbor
+      // After building the top surface of each tile, check right neighbor and generate skirt
       if (col < GRID - 1) {
         const rightTile = tiles[row * GRID + (col + 1)];
         const rightAlt = (rightTile.alt ?? 0) / 50;
@@ -191,8 +192,27 @@ function loadCityFromTiles(tiles) {
           positions.push(terrainX + TILE_SIZE, curRightY,      terrainZ);
         }
       }
-    }
-  }
+
+
+
+
+      // Create building
+      const buildingId = tile.building ?? 0;
+
+      if (buildingId >= 0x06 && buildingId <= 0x0D) {
+        const buildingHeight = TILE_SIZE * 0.5;
+        const building = new THREE.Mesh(
+          new THREE.BoxGeometry(TILE_SIZE, buildingHeight, TILE_SIZE),
+          new THREE.MeshStandardMaterial({ color: 0x00FF00 })
+        );
+        building.position.set(x, (buildingHeight / 2) + alt, z);
+        scene.add(building);
+        collidables.push(building);
+      }
+
+
+    } // end for(col)
+  } // end for(row)
 
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute(
