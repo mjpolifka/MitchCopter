@@ -4,6 +4,7 @@ import sc2kparser from './src/sc2kparser.js'
 
 const collidables = []
 const loader = new GLTFLoader();
+const textureLoader = new THREE.TextureLoader();
 
 
 // Prime loading text
@@ -30,7 +31,7 @@ dropZone.addEventListener('drop', function(event) {
     fileReader.onload = function(e) {
       const bytes = new Uint8Array(e.target.result);
       const struct = sc2kparser.parse(bytes);
-      loadCityFromFile(struct.tiles);
+      loadCityFromTiles(struct.tiles);
     };
     fileReader.readAsArrayBuffer(file);
   }, 1500);
@@ -40,16 +41,182 @@ dropZone.addEventListener('drop', function(event) {
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 
 
-function loadCityFromFile(tiles) {
+function loadCityFromTiles(tiles) {
   document.getElementById('status').textContent = 'Reticulating splines...';
   console.log(tiles);
 
+  // iterate through tiles and fire off whatever needs to happen
+  const TILE_SIZE = 1;
+  const HEIGHT_SCALE = 1;
+  const GRID = 128; // Math.Sqrt(tiles)?  Then I can make bigger cities later
+
+  const positions = [];
+
+  for (let row = 0; row < GRID; row++) {
+    for (let col = 0; col < GRID; col++) {
+      const tile = tiles[row * GRID + col];
+      const alt = (tile.alt ?? 0) / 50;  // alt comes in multiples of 50
+      const slope = tile.terrain?.slope ?? [0, 0, 0, 0];
+
+      const x = col * TILE_SIZE;
+      const z = row * TILE_SIZE;
+
+      // 4 corner heights  [topLeft, topRight, bottomLeft, bottomRight]
+      const yA = (alt + slope[0]) * HEIGHT_SCALE;  // top-left
+      const yB = (alt + slope[1]) * HEIGHT_SCALE;  // top-right
+      const yC = (alt + slope[2]) * HEIGHT_SCALE;  // bottom-left
+      const yD = (alt + slope[3]) * HEIGHT_SCALE;  // bottom-right
+
+      // Triangle 1: A, C, D
+      positions.push(x,        yA, z);
+      positions.push(x,        yC, z + TILE_SIZE);
+      positions.push(x + TILE_SIZE, yD, z + TILE_SIZE);
+
+      // Triangle 2: A, D, B
+      positions.push(x,        yA, z);
+      positions.push(x + TILE_SIZE, yD, z + TILE_SIZE);
+      positions.push(x + TILE_SIZE, yB, z);
+
+      // After building the top surface of each tile, check right neighbor
+      if (col < GRID - 1) {
+        const rightTile = tiles[row * GRID + (col + 1)];
+        const rightAlt = (rightTile.alt ?? 0) / 50;
+        const rightSlope = rightTile.terrain?.slope ?? [0,0,0,0];
+
+        // right edge of current tile
+        const topY    = yB;  // current tile top-right
+        const bottomY = yD;  // current tile bottom-right
+
+        // left edge of right neighbor
+        const rightTopY    = (rightAlt + rightSlope[0]) * HEIGHT_SCALE;
+        const rightBottomY = (rightAlt + rightSlope[2]) * HEIGHT_SCALE;
+
+        // fill the wall if there's a gap
+        const wallTopY    = Math.min(topY, rightTopY);
+        const wallBottomY = Math.min(bottomY, rightBottomY);
+
+        if (topY !== rightTopY || bottomY !== rightBottomY) {
+          // quad between the two edges
+          positions.push(x + TILE_SIZE, topY,       z);
+          positions.push(x + TILE_SIZE, wallTopY,   z);
+          positions.push(x + TILE_SIZE, wallBottomY, z + TILE_SIZE);
+
+          positions.push(x + TILE_SIZE, topY,        z);
+          positions.push(x + TILE_SIZE, wallBottomY, z + TILE_SIZE);
+          positions.push(x + TILE_SIZE, bottomY,     z + TILE_SIZE);
+        }
+      }
+
+      // Check bottom neighbor
+      if (row < GRID - 1) {
+        const bottomTile = tiles[(row + 1) * GRID + col];
+        const bottomAlt = (bottomTile.alt ?? 0) / 50;
+        const bottomSlope = bottomTile.terrain?.slope ?? [0,0,0,0];
+
+        // bottom edge of current tile
+        const leftY  = yC;  // current tile bottom-left
+        const rightY = yD;  // current tile bottom-right
+
+        // top edge of bottom neighbor
+        const neighborLeftY  = (bottomAlt + bottomSlope[0]) * HEIGHT_SCALE;
+        const neighborRightY = (bottomAlt + bottomSlope[1]) * HEIGHT_SCALE;
+
+        // if (leftY !== neighborLeftY || rightY !== neighborRightY) {
+        //   const wallLeftY  = Math.min(leftY, neighborLeftY);
+        //   const wallRightY = Math.min(rightY, neighborRightY);
+
+        //   positions.push(x,            leftY,     z + TILE_SIZE);
+        //   positions.push(x,            wallLeftY, z + TILE_SIZE);
+        //   positions.push(x + TILE_SIZE, wallRightY, z + TILE_SIZE);
+
+        //   positions.push(x,            leftY,      z + TILE_SIZE);
+        //   positions.push(x + TILE_SIZE, wallRightY, z + TILE_SIZE);
+        //   positions.push(x + TILE_SIZE, rightY,     z + TILE_SIZE);
+        // }
+
+        if (leftY !== neighborLeftY || rightY !== neighborRightY) {
+          // Triangle 1
+          positions.push(x,             leftY,      z + TILE_SIZE);
+          positions.push(x,             neighborLeftY, z + TILE_SIZE);
+          positions.push(x + TILE_SIZE, neighborRightY, z + TILE_SIZE);
+
+          // Triangle 2
+          positions.push(x,             leftY,       z + TILE_SIZE);
+          positions.push(x + TILE_SIZE, neighborRightY, z + TILE_SIZE);
+          positions.push(x + TILE_SIZE, rightY,      z + TILE_SIZE);
+        }
+      }
+
+      // Check left neighbor
+      if (col > 0) {
+        const leftTile = tiles[row * GRID + (col - 1)];
+        const leftAlt = (leftTile.alt ?? 0) / 50;
+        const leftSlope = leftTile.terrain?.slope ?? [0,0,0,0];
+
+        const curTopY    = yA;  // current tile top-left
+        const curBottomY = yC;  // current tile bottom-left
+
+        const neighborTopY    = (leftAlt + leftSlope[1]) * HEIGHT_SCALE;  // right edge of left neighbor
+        const neighborBottomY = (leftAlt + leftSlope[3]) * HEIGHT_SCALE;
+
+        if (curTopY !== neighborTopY || curBottomY !== neighborBottomY) {
+          positions.push(x, curTopY,      z);
+          positions.push(x, neighborTopY, z);
+          positions.push(x, neighborBottomY, z + TILE_SIZE);
+
+          positions.push(x, curTopY,         z);
+          positions.push(x, neighborBottomY, z + TILE_SIZE);
+          positions.push(x, curBottomY,      z + TILE_SIZE);
+        }
+      }
+
+      // Check top neighbor
+      if (row > 0) {
+        const topTile = tiles[(row - 1) * GRID + col];
+        const topAlt = (topTile.alt ?? 0) / 50;
+        const topSlope = topTile.terrain?.slope ?? [0,0,0,0];
+
+        const curLeftY  = yA;  // current tile top-left
+        const curRightY = yB;  // current tile top-right
+
+        const neighborLeftY  = (topAlt + topSlope[2]) * HEIGHT_SCALE;  // bottom edge of top neighbor
+        const neighborRightY = (topAlt + topSlope[3]) * HEIGHT_SCALE;
+
+        if (curLeftY !== neighborLeftY || curRightY !== neighborRightY) {
+          positions.push(x,             curLeftY,      z);
+          positions.push(x,             neighborLeftY, z);
+          positions.push(x + TILE_SIZE, neighborRightY, z);
+
+          positions.push(x,             curLeftY,       z);
+          positions.push(x + TILE_SIZE, neighborRightY, z);
+          positions.push(x + TILE_SIZE, curRightY,      z);
+        }
+      }
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(new Float32Array(positions), 3)
+  );
+  geometry.computeVertexNormals(); // needed for lighting to work
+
+  const material = new THREE.MeshStandardMaterial({ 
+    color: 0x4a7c4e,
+    flatShading: true,
+    wireframe: false
+  });
+
+  const mesh = new THREE.Mesh(geometry, material);
+  scene.add(mesh);
+  collidables.push(mesh);
+
   setTimeout(() => {
-    buildDemo(startGame);
-  }, 1000);
+    // buildDemo(startGame);
+    startGame();
+  }, 1);
 }
-
-
 
 
 
@@ -101,7 +268,7 @@ helicopterObject.rotation.y = Math.PI; // rotate the helicopter to face the buil
 
 // ----------- Add Objects To Scene -----------
 
-const textureLoader = new THREE.TextureLoader();
+// const textureLoader = new THREE.TextureLoader(); // added to top
 
 function buildDemo(onComplete) {
   // Floor
@@ -251,6 +418,15 @@ function resolveCollision(hits, directionVector) {
   }
 }
 
+function getTerrainHeight(x, z){
+  const raycaster = new THREE.Raycaster();
+  raycaster.set(
+    new THREE.Vector3(x, 1000, z), // position: high above the helicopter
+    new THREE.Vector3(0, -1, 0) // direction: facing downwards
+  );
+  const hits = raycaster.intersectObjects(collidables);
+  return hits.length > 0 ? hits[0].point.y : 0;
+}
 
 
 
@@ -314,5 +490,8 @@ function startGame() {
   document.getElementById("loading-screen").style.display = 'none';
   document.getElementById("controls-panel").style.display = 'block';
   document.getElementById("game-screen").style.display = 'block';
+
+  helicopterObject.position.y = getTerrainHeight(helicopterObject.position.x, helicopterObject.position.z);
+
   animate(0);
 }
