@@ -11,6 +11,13 @@ const textureLoader = new THREE.TextureLoader();
 document.getElementById('status').textContent = 'Waiting for city file...';
 
 // Enable loading-screen
+const demoButton = document.getElementById("demo-button");
+demoButton.addEventListener('click', function(e) {
+  e.preventDefault();
+  console.log("Clicked demo button");
+  buildDemo(startGame);
+});
+
 const dropZone = document.getElementById("drop-zone");
 
 dropZone.addEventListener('dragover', function(event) {
@@ -213,7 +220,6 @@ function loadCityFromTiles(tiles) {
   collidables.push(mesh);
 
   setTimeout(() => {
-    // buildDemo(startGame);
     startGame();
   }, 1);
 }
@@ -491,7 +497,7 @@ function startGame() {
   document.getElementById("controls-panel").style.display = 'block';
   document.getElementById("game-screen").style.display = 'block';
 
-  helicopterObject.position.y = getTerrainHeight(helicopterObject.position.x, helicopterObject.position.z);
+  helicopterObject.position.y = getTerrainHeight(helicopterObject.position.x, helicopterObject.position.z) + 1.6;
 
   animate(0);
 }

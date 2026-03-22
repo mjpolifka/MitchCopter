@@ -132,6 +132,14 @@ canvas {
   animation: blink 1s step-end infinite;
 }
 
+#demo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 @keyframes blink {
   50% { opacity: 0; }
 }

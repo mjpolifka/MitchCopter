@@ -63,7 +63,9 @@
   - ✔create "loading screen"
   - ✔parse a file to console
   - ✔switch screens
-- >create altitude vertex map from tiles
-- iterate through map creating "floors" at the right altitude
-  - divide the altitude data by 50 to get "1's"
-  - use BufferGeometry and don't make 16k objects
+- ~~create altitude vertex map from tiles~~
+- ~~iterate through map creating "floors" at the right altitude~~
+- ✔iterate through the tiles and create terrain at the right altitude and slope
+  - ✔divide the altitude data by 50 to get "1's"
+  - ✔use BufferGeometry and don't make 16k objects
+- ✔before merging back to "mitch" for deployment, make a button to use the old demo instead of an .sc2 file
