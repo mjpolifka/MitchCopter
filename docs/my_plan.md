@@ -57,7 +57,7 @@
 
 ### Altitude Squares
 
-- include sc2kparser
+- >include sc2kparser
   - figure out ISC attribution requirements
 - parse city into tiles
 - create altitude map from tiles
