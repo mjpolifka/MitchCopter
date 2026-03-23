@@ -1,0 +1,153 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+}
+
+canvas {
+  /* display: block; */
+  display: none;
+}
+
+
+/* CONTROLS PANEL */
+
+#controls-panel {
+  position: fixed;       /* stays in place regardless of anything */
+  top: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-family: monospace;
+  font-size: 13px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  pointer-events: none;  /* clicks pass through to the canvas */
+  user-select: none;
+  z-index: 10;           /* sits above the canvas */
+  border-right: 1px solid rgba(255,255,255,0.3);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+
+#controls-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  padding-bottom: 6px;
+}
+
+#controls-panel p {
+  margin: 4px 0;
+}
+
+
+
+
+
+/* LOADING SCREEN */
+
+/* ── Loading Screen ─────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  background: #0a0f0a;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 80, 0.03) 2px,
+      rgba(0, 255, 80, 0.03) 4px
+    );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-family: 'Share Tech Mono', monospace;
+  color: #00ff50;
+  z-index: 100;
+}
+
+#loading-screen h1 {
+  font-size: 3rem;
+  margin: 0;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 10px #00ff50,
+    0 0 40px rgba(0, 255, 80, 0.4);
+  animation: flicker 6s infinite;
+}
+
+#loading-screen h3 {
+  font-size: 0.85rem;
+  margin: 0;
+  letter-spacing: 0.2em;
+  color: rgba(0, 255, 80, 0.6);
+  text-transform: uppercase;
+}
+
+#drop-zone {
+  margin-top: 24px;
+  width: 320px;
+  height: 120px;
+  border: 1px solid rgba(0, 255, 80, 0.4);
+  box-shadow:
+    0 0 12px rgba(0, 255, 80, 0.15),
+    inset 0 0 24px rgba(0, 255, 80, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: rgba(0, 255, 80, 0.5);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#drop-zone:hover,
+#drop-zone.drag-over {
+  border-color: #00ff50;
+  color: #00ff50;
+  box-shadow:
+    0 0 24px rgba(0, 255, 80, 0.3),
+    inset 0 0 32px rgba(0, 255, 80, 0.1);
+}
+
+#status {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: rgba(0, 255, 80, 0.5);
+  min-height: 1em;
+}
+
+#status:not(:empty)::after {
+  content: '█';
+  animation: blink 1s step-end infinite;
+}
+
+#demo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes flicker {
+  0%, 95%, 100% { opacity: 1; }
+  96% { opacity: 0.8; }
+  97% { opacity: 1; }
+  98% { opacity: 0.6; }
+  99% { opacity: 1; }
+}
