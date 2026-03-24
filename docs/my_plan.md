@@ -34,6 +34,7 @@
           - ✔standard grey block
     - ✔fix terrain issues
     - >how do we do the water?
+      - something about water is making the terrain funky
     - compare with original and fix scaling, check terrain
     - model aggregate buildings as single object
       - the iterator is going to have to remember stuff

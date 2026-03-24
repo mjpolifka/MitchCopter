@@ -6,6 +6,13 @@ const collidables = []
 const loader = new GLTFLoader();
 const textureLoader = new THREE.TextureLoader();
 
+const TILE_SIZE = 4;
+const HEIGHT_SCALE = 4;
+
+const xPos = document.getElementById('x-pos');
+const yPos = document.getElementById('y-pos');
+const zPos = document.getElementById('z-pos');
+
 
 // Prime loading text
 document.getElementById('status').textContent = 'Waiting for city file...';
@@ -53,8 +60,6 @@ function loadCityFromTiles(tiles) {
   console.log(tiles);
 
   // iterate through tiles and fire off whatever needs to happen
-  const TILE_SIZE = 1;
-  const HEIGHT_SCALE = 1;
   const GRID = 128; // Math.Sqrt(tiles.length)?  Then I can make bigger cities later
 
   const positions = [];
@@ -533,6 +538,10 @@ function animate(timestamp) {
   checkCollisions();
 
   renderer.render(scene, camera);
+
+  xPos.innerHTML = (helicopterObject.position.x / TILE_SIZE).toFixed(2);
+  yPos.innerHTML = (helicopterObject.position.y / TILE_SIZE).toFixed(2);
+  zPos.innerHTML = (helicopterObject.position.z / TILE_SIZE).toFixed(2);
 }
 
 function startGame() {
